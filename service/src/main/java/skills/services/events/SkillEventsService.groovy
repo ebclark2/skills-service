@@ -287,7 +287,7 @@ class SkillEventsService {
 
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, skillDefinition)
         if (requestedSkillCompleted) {
-            documentSkillAchieved(userId, numExistingSkills, skillDefinition, res, skillDate)
+            pointsAndAchievementsHandler.documentSkillAchieved(userId, skillDefinition, res, skillDate)
             achievedBadgeHandler.checkForBadges(res, userId, skillDefinition, skillDate)
             achievedSkillsGroupHandler.checkForSkillsGroup(res, userId, skillDefinition, skillDate)
         }
@@ -298,7 +298,7 @@ class SkillEventsService {
             achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, skillDefinition.projectId, skillDefinition)
         }
 
-        importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(userId, skillDefinition, skillDate)
+        importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(userId, skillDefinition, skillDate, requestedSkillCompleted)
 
         return res
     }
@@ -402,27 +402,6 @@ class SkillEventsService {
                     .projectId(projectId).skillId(skillId).userId(userId).build()
         }
         return skillDefinition
-    }
-
-    @Profile
-    private void documentSkillAchieved(String userId, long numExistingSkills, SkillDefMin skillDefinition, SkillEventResult res, SkillDate skillDate) {
-        Date achievedOn = getAchievedOnDate(userId, skillDefinition, skillDate)
-        UserAchievement skillAchieved = new UserAchievement(userId: userId.toLowerCase(), projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
-                pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement), achievedOn: achievedOn)
-        achievedLevelRepo.save(skillAchieved)
-        res.completed.add(new CompletionItem(type: CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name))
-    }
-
-    @Profile
-    private Date getAchievedOnDate(String userId, SkillDefMin skillDefinition, SkillDate skillDate) {
-        if (!skillDate.isProvided) {
-            return skillDate.date
-        }
-        Date achievedOn = skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), skillDefinition.projectId, skillDefinition.skillId)
-        if (!achievedOn || skillDate.date.after(achievedOn)) {
-            achievedOn = skillDate.date
-        }
-        return achievedOn
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillDefMin skillDefinition) {
