@@ -30,7 +30,6 @@ import skills.services.SelfReportingService
 import skills.services.UserEventService
 import skills.services.admin.SkillCatalogService
 import skills.services.admin.SkillsGroupAdminService
-import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
@@ -43,6 +42,7 @@ import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
+import skills.tasks.TaskSchedulerService
 import skills.utils.MetricsLogger
 
 import static skills.services.events.CompletionItem.CompletionItemType
@@ -113,7 +113,7 @@ class SkillEventsService {
     QueuedSkillUpdateRepo queuedSkillUpdateRepo
 
     @Autowired
-    ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
+    TaskSchedulerService taskSchedulerService
 
     static class SkillApprovalParams {
         boolean disableChecks = false
@@ -298,7 +298,7 @@ class SkillEventsService {
             achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, skillDefinition.projectId, skillDefinition)
         }
 
-        importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(userId, skillDefinition, skillDate, requestedSkillCompleted)
+        taskSchedulerService.scheduleImportedSkillAchievement(projectId, skillId, userId, skillDefinition.id, skillDate, requestedSkillCompleted)
 
         return res
     }

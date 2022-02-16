@@ -47,6 +47,8 @@
         <owasp.encoder.version>1.2.3</owasp.encoder.version>
 
         <log4j2.version>2.17.0</log4j2.version>
+
+        <db-scheduler.version>10.5</db-scheduler.version>
     </properties>
 
     <parent>
