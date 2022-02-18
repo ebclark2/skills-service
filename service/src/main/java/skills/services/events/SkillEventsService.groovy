@@ -298,7 +298,9 @@ class SkillEventsService {
             achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, skillDefinition.projectId, skillDefinition)
         }
 
-        taskSchedulerService.scheduleImportedSkillAchievement(projectId, skillId, userId, skillDefinition.id, skillDate, requestedSkillCompleted)
+        if (isCatalogSkill) {
+            taskSchedulerService.scheduleImportedSkillAchievement(projectId, skillId, userId, skillDefinition.id, skillDate, requestedSkillCompleted)
+        }
 
         return res
     }
