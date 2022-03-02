@@ -307,34 +307,7 @@ class SkillEventsService {
 
     @Profile
     private void recordEvent(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean isCatalogSkill=false) {
-        if (skillDefinition.getCopiedFrom() != null || isCatalogSkill) {
-            List<SkillDefMin> toBeRecorded = []
-            if (isCatalogSkill) {
-                List<SkillDefMin> copies = skillCatalogService.getSkillsCopiedFrom(skillDefinition.id)
-                if (copies) {
-                    toBeRecorded.addAll(copies)
-                }
-            } else {
-                //get og skill, record event for og and all copies except for skillDefinition
-                SkillDefMin og = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)
-                List<SkillDefMin> copies = skillCatalogService.getSkillsCopiedFrom(og.id)
-                toBeRecorded.add(og)
-                //not working
-                if (copies) {
-                    toBeRecorded.addAll(copies)
-                    toBeRecorded.removeIf { it.id == skillDefinition.id }
-                }
-            }
-            toBeRecorded?.each {
-                userEventService.recordEvent(it.projectId, it.id, userId, skillDate.date)
-            }
-        }
         userEventService.recordEvent(skillDefinition.projectId, skillDefinition.id, userId, skillDate.date)
-    }
-
-    @Profile
-    private void recordEvent(String projectId, Integer rawSkillDefId, String userId, SkillDate skillDate) {
-        userEventService.recordEvent(projectId, rawSkillDefId, userId, skillDate.date)
     }
 
     @Profile
